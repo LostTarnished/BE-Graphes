@@ -99,5 +99,4 @@ public class BellmanFordAlgorithm extends ShortestPathAlgorithm {
 
         return solution;
     }
-
 }

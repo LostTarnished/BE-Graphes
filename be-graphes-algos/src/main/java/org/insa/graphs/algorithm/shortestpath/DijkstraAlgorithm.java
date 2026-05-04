@@ -1,5 +1,14 @@
 package org.insa.graphs.algorithm.shortestpath;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.insa.graphs.algorithm.utils.BinaryHeap;
+import org.insa.graphs.model.Arc;
+import org.insa.graphs.model.Graph;
+import org.insa.graphs.model.Path;
+
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
     public DijkstraAlgorithm(ShortestPathData data) {
@@ -9,16 +18,87 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
     @Override
     protected ShortestPathSolution doRun() {
 
-        // retrieve data from the input problem (getInputData() is inherited from the
-        // parent class ShortestPathAlgorithm)
-        final ShortestPathData data = getInputData();
+        // Retrieve the graph.
+        ShortestPathData data = getInputData();
+        Graph graph = data.getGraph();
 
-        // variable that will contain the solution of the shortest path problem
+        final int nbNodes = graph.size();
+        BinaryHeap<double> tas = new BinaryHeap();
+
+        for (int i = 0; i < 10; i++) {
+            tas.arraySet()
+        }
+
+        // Initialize array of distances.
+        double[] distances = new double[nbNodes];
+        Arrays.fill(distances, Double.POSITIVE_INFINITY);
+        distances[data.getOrigin().getId()] = 0;
+
+        // Notify observers about the first event (origin processed).
+        notifyOriginProcessed(data.getOrigin());
+
+        // Initialize array of predecessors.
+        Arc[] predecessorArcs = new Arc[nbNodes];
+
+        boolean found = false;
+        for (int i = 0; !found && i < nbNodes; ++i) {
+            found = true;
+            node = tas.deleteMin();
+
+            for (Arc arc : node.getSuccessors()) {
+
+                // Small test to check allowed roads...
+                if (!data.isAllowed(arc)) {
+                    continue;
+                }
+
+                // Retrieve weight of the arc.
+                double w = data.getCost(arc);
+                double oldDistance = distances[arc.getDestination().getId()];
+                double newDistance = distances[node.getId()] + w;
+
+                if (Double.isInfinite(oldDistance)
+                        && Double.isFinite(newDistance)) {
+                    notifyNodeReached(arc.getDestination());
+                }
+
+                // Check if new distances would be better, if so update...
+                if (newDistance < oldDistance) {
+                    found = false;
+                    distances[arc.getDestination().getId()] =
+                            distances[node.getId()] + w;
+                    predecessorArcs[arc.getDestination().getId()] = arc;
+                }
+            }
+        }
+
         ShortestPathSolution solution = null;
 
-        // TODO: implement the Dijkstra algorithm
+        // Destination has no predecessor, the solution is infeasible...
+        if (predecessorArcs[data.getDestination().getId()] == null) {
+            solution = new ShortestPathSolution(data, Status.INFEASIBLE);
+        }
+        else {
 
-        // when the algorithm terminates, return the solution that has been found
+            // The destination has been found, notify the observers.
+            notifyDestinationReached(data.getDestination());
+
+            // Create the path from the array of predecessors...
+            ArrayList<Arc> arcs = new ArrayList<>();
+            Arc arc = predecessorArcs[data.getDestination().getId()];
+            while (arc != null) {
+                arcs.add(arc);
+                arc = predecessorArcs[arc.getOrigin().getId()];
+            }
+
+            // Reverse the path...
+            Collections.reverse(arcs);
+
+            // Create the final solution.
+            solution = new ShortestPathSolution(data, Status.OPTIMAL,
+                    new Path(graph, arcs));
+        }
+
         return solution;
     }
 
