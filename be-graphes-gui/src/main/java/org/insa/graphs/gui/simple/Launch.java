@@ -1,6 +1,7 @@
 package org.insa.graphs.gui.simple;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -9,6 +10,8 @@ import java.io.FileInputStream;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.insa.graphs.algorithm.ArcInspectorFactory;
+import org.insa.graphs.algorithm.shortestpath.*;
 import org.insa.graphs.gui.drawing.Drawing;
 import org.insa.graphs.gui.drawing.components.BasicDrawing;
 import org.insa.graphs.model.Graph;
@@ -17,6 +20,7 @@ import org.insa.graphs.model.io.BinaryGraphReader;
 import org.insa.graphs.model.io.BinaryPathReader;
 import org.insa.graphs.model.io.GraphReader;
 import org.insa.graphs.model.io.PathReader;
+
 
 public class Launch {
 
@@ -68,10 +72,19 @@ public class Launch {
 
         try (final PathReader pathReader = new BinaryPathReader(new DataInputStream(
                 new BufferedInputStream(new FileInputStream(pathName))))) {
-
             path = pathReader.readPath(graph);
+
         }
+        ShortestPathData data = new ShortestPathData(graph, path.getOrigin(), path.getDestination(), ArcInspectorFactory.getAllFilters().get(0));
+        ShortestPathSolution PCC_length_dj = (new DijkstraAlgorithm(data)).run();
+        ShortestPathSolution PCC_length_astar = (new AStarAlgorithm(data)).run();
+        ShortestPathSolution PCC_length_bf = (new BellmanFordAlgorithm(data)).run();
 
         drawing.drawPath(path);
+        drawing.drawPath(PCC_length_dj.getPath(), Color.green);
+        drawing.drawPath(PCC_length_astar.getPath(), Color.cyan);
+        drawing.drawPath(PCC_length_bf.getPath(), Color.black);
     }
+
+
 }

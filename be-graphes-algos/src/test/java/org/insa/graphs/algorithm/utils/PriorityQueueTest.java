@@ -260,7 +260,8 @@ public abstract class PriorityQueueTest {
             MutableInteger min = queue.deleteMin();
             try {
                 queue.remove(min);
-                fail("Expected exception " + ElementNotFoundException.class.getName() + " " + min);
+                fail("Expected exception " + ElementNotFoundException.class.getName()
+                        + " " + min);
             }
             catch (ElementNotFoundException e) {
                 assertEquals(min, e.getElement());

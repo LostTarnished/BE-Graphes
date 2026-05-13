@@ -5,10 +5,10 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.insa.graphs.algorithm.AbstractInputData.Mode;
-import org.insa.graphs.model.Arc;
-import org.insa.graphs.model.GraphStatistics;
 import org.insa.graphs.model.AccessRestrictions.AccessMode;
 import org.insa.graphs.model.AccessRestrictions.AccessRestriction;
+import org.insa.graphs.model.Arc;
+import org.insa.graphs.model.GraphStatistics;
 
 public class ArcInspectorFactory {
 
@@ -110,6 +110,40 @@ public class ArcInspectorFactory {
         }
     };
 
+    private static class OnlyBicycleByTime implements ArcInspector {
+
+        static final int maxBicycleSpeed = 30;
+
+        @Override
+        public boolean isAllowed(Arc arc) {
+            return arc.getRoadInformation().getAccessRestrictions().isAllowedForAny(
+                    AccessMode.BICYCLE,
+                    EnumSet.complementOf(EnumSet.of(AccessRestriction.FORBIDDEN,
+                            AccessRestriction.PRIVATE)));
+        }
+
+        @Override
+        public double getCost(Arc arc) {
+            return arc.getTravelTime(Math.min(maxBicycleSpeed,
+                    arc.getRoadInformation().getMaximumSpeed()));
+        }
+
+        @Override
+        public String toString() {
+            return "Fastest path for bicycle";
+        }
+
+        @Override
+        public int getMaximumSpeed() {
+            return 30;
+        }
+
+        @Override
+        public Mode getMode() {
+            return Mode.TIME;
+        }
+    };
+
     /**
      * @return List of all arc filters in this factory.
      */
@@ -118,7 +152,7 @@ public class ArcInspectorFactory {
         // to get an understandable output!):
         return Arrays.asList(new NoFilterByLengthArcInspector(),
                 new OnlyCarsByLengthArcInspector(), new OnlyCarsByTimeArcInspector(),
-                new OnlyPedestrianByTime());
+                new OnlyPedestrianByTime(), new OnlyBicycleByTime());
     }
 
 }

@@ -1,9 +1,9 @@
 package org.insa.graphs.algorithm.shortestpath;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
+import org.insa.graphs.algorithm.AbstractSolution.Status;
 import org.insa.graphs.algorithm.utils.BinaryHeap;
 import org.insa.graphs.model.Arc;
 import org.insa.graphs.model.Graph;
@@ -20,19 +20,29 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
         // Retrieve the graph.
         ShortestPathData data = getInputData();
-        Graph graph = data.getGraph();
-
-        final int nbNodes = graph.size();
-        BinaryHeap<double> tas = new BinaryHeap();
-
-        for (int i = 0; i < 10; i++) {
-            tas.arraySet()
-        }
+        final int nbNodes = data.getGraph().size();
 
         // Initialize array of distances.
-        double[] distances = new double[nbNodes];
-        Arrays.fill(distances, Double.POSITIVE_INFINITY);
-        distances[data.getOrigin().getId()] = 0;
+        Label[] distance = new Label[nbNodes];
+
+        for (int i = 0; i < nbNodes; i++) {
+            Label l = new Label(data.getGraph().getNodes().get(i),
+                    Double.POSITIVE_INFINITY);
+            distance[i] = l;
+        }
+
+        return this.doAlgorithm(data, distance);
+    }
+
+    protected ShortestPathSolution doAlgorithm(ShortestPathData data,
+            Label[] distance) {
+        Graph graph = data.getGraph();
+        final int nbNodes = graph.size();
+
+        BinaryHeap<Label> heap = new BinaryHeap<Label>();
+
+        distance[data.getOrigin().getId()].setCost(Double.valueOf(0));
+        heap.insert(distance[data.getOrigin().getId()]);
 
         // Notify observers about the first event (origin processed).
         notifyOriginProcessed(data.getOrigin());
@@ -40,33 +50,46 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         // Initialize array of predecessors.
         Arc[] predecessorArcs = new Arc[nbNodes];
 
-        boolean found = false;
-        for (int i = 0; !found && i < nbNodes; ++i) {
-            found = true;
-            node = tas.deleteMin();
+        while (!heap.isEmpty()) {
+            Label l = heap.deleteMin();
+            l.setMarked(true);
 
-            for (Arc arc : node.getSuccessors()) {
+            if (l.getCurrentNode() == data.getDestination()) {
+                break;
+            }
+
+            for (Arc arc : l.getCurrentNode().getSuccessors()) {
 
                 // Small test to check allowed roads...
                 if (!data.isAllowed(arc)) {
                     continue;
                 }
 
+                if (distance[arc.getDestination().getId()].getMarked()) {
+                    continue;
+                }
+
                 // Retrieve weight of the arc.
                 double w = data.getCost(arc);
-                double oldDistance = distances[arc.getDestination().getId()];
-                double newDistance = distances[node.getId()] + w;
+                double oldDistance = distance[arc.getDestination().getId()].getCost();
+                double newDistance = distance[arc.getOrigin().getId()].getCost() + w;
 
-                if (Double.isInfinite(oldDistance)
-                        && Double.isFinite(newDistance)) {
+                if (Double.isInfinite(oldDistance) && Double.isFinite(newDistance)) {
                     notifyNodeReached(arc.getDestination());
                 }
 
                 // Check if new distances would be better, if so update...
                 if (newDistance < oldDistance) {
-                    found = false;
-                    distances[arc.getDestination().getId()] =
-                            distances[node.getId()] + w;
+                    Label l2 = distance[arc.getDestination().getId()];
+
+                    if (!Double.isInfinite(oldDistance)) {
+                        heap.remove(l2);
+                    }
+
+                    l2.setCost(newDistance);
+                    l2.setDad(l.getCurrentNode());
+                    heap.insert(l2);
+
                     predecessorArcs[arc.getDestination().getId()] = arc;
                 }
             }
@@ -101,5 +124,4 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
         return solution;
     }
-
 }
