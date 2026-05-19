@@ -144,6 +144,8 @@ public class LaunchLeFinal {
         d2e = Node.linkNodes(nodes[3], nodes[4], 22.8f, speed20, null);
         e2d = Node.linkNodes(nodes[4], nodes[0], 10, speed10, null);
 
+		// Test
+
         graph = new Graph("ID", "", Arrays.asList(nodes), null);
 
         emptyPath = new Path(graph, new ArrayList<Arc>());
