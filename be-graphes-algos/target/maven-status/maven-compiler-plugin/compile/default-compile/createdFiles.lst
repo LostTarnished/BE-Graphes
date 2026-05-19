@@ -6,8 +6,8 @@ org/insa/graphs/algorithm/utils/BinaryHeapFormatter$Context.class
 org/insa/graphs/algorithm/utils/BinaryHeapFormatter.class
 org/insa/graphs/algorithm/packageswitch/PackageSwitchObserver.class
 org/insa/graphs/algorithm/AbstractAlgorithm.class
-org/insa/graphs/algorithm/packageswitch/PackageSwitchData.class
 org/insa/graphs/algorithm/shortestpath/ShortestPathSolution.class
+org/insa/graphs/algorithm/packageswitch/PackageSwitchData.class
 org/insa/graphs/algorithm/shortestpath/ShortestPathTextObserver.class
 org/insa/graphs/algorithm/utils/BinaryHeap.class
 org/insa/graphs/algorithm/AbstractSolution.class
@@ -29,8 +29,8 @@ org/insa/graphs/algorithm/ArcInspector.class
 org/insa/graphs/algorithm/ArcInspectorFactory$OnlyCarsByLengthArcInspector.class
 org/insa/graphs/algorithm/weakconnectivity/WeaklyConnectedComponentsSolution.class
 org/insa/graphs/algorithm/packageswitch/PackageSwitchTextObserver.class
-org/insa/graphs/algorithm/packageswitch/PackageSwitchSolution.class
 org/insa/graphs/algorithm/weakconnectivity/WeaklyConnectedComponentObserver.class
+org/insa/graphs/algorithm/packageswitch/PackageSwitchSolution.class
 org/insa/graphs/algorithm/ArcInspectorFactory$NoFilterByLengthArcInspector.class
 org/insa/graphs/algorithm/utils/EmptyPriorityQueueException.class
 org/insa/graphs/algorithm/shortestpath/AStarAlgorithm.class

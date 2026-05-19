@@ -75,7 +75,8 @@ public class Launch {
             path = pathReader.readPath(graph);
 
         }
-        ShortestPathData data = new ShortestPathData(graph, path.getOrigin(), path.getDestination(), ArcInspectorFactory.getAllFilters().get(0));
+        ShortestPathData data = new ShortestPathData(graph, path.getOrigin(),
+                path.getDestination(), ArcInspectorFactory.getAllFilters().get(0));
         ShortestPathSolution PCC_length_dj = (new DijkstraAlgorithm(data)).run();
         ShortestPathSolution PCC_length_astar = (new AStarAlgorithm(data)).run();
         ShortestPathSolution PCC_length_bf = (new BellmanFordAlgorithm(data)).run();

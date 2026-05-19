@@ -10,9 +10,9 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
         super(data);
     }
 
-    public Double getMaxSpeed(ShortestPathData data) 
-    {
-        Double maxSpeed = Double.min(data.getMaximumSpeed(), data.getGraph().getGraphInformation().getMaximumSpeed());
+    public Double getMaxSpeed(ShortestPathData data) {
+        Double maxSpeed = Double.min(data.getMaximumSpeed(),
+                data.getGraph().getGraphInformation().getMaximumSpeed());
 
         return maxSpeed == -1 ? 500 : maxSpeed;
     }
@@ -32,7 +32,7 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
             StarLabel l = new StarLabel(n, Double.POSITIVE_INFINITY, Double.valueOf(
                     Point.distance(n.getPoint(), data.getDestination().getPoint())));
 
-            if(data.getMode() == AbstractInputData.Mode.TIME) {
+            if (data.getMode() == AbstractInputData.Mode.TIME) {
                 l.setCostEstimated(l.getCostEstimated() / getMaxSpeed(data));
             }
 
