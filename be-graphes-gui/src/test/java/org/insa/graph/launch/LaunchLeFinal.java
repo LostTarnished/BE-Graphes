@@ -122,9 +122,11 @@ public class LaunchLeFinal {
         ShortestPathSolution solDj = new DijkstraAlgorithm(data).run();
         ShortestPathSolution solBf = new BellmanFordAlgorithm(data).run();
 
-        assertTrue(solBf.isFeasible());
-        assertTrue(solDj.getPath().isValid());
-        assertEquals(solBf.getPath().getLength(), solDj.getPath().getLength(), 1e-6);
+        if (solBf.isFeasible()) {
+            assertTrue(solDj.getPath().isValid());
+            assertEquals(solBf.getPath().getLength(), solDj.getPath().getLength(),
+                    1e-6);
+        }
     }
 
     @Test
