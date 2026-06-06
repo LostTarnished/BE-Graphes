@@ -1,62 +1,85 @@
 package org.insa.graphs.algorithm.shortestpath;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.insa.graphs.model.Arc;
+import org.insa.graphs.model.Graph;
 import org.insa.graphs.model.Node;
+import org.insa.graphs.model.Path;
+import org.insa.graphs.algorithm.AbstractInputData.Status;
 
-public class MarathonAlgorithm extends ShortestPathAlgorithm 
-{
-    private final float ACCEPTABLE = 0.1f;
+public class MarathonAlgorithm extends ShortestPathAlgorithm {
 
-    private static boolean is_acceptable = false;
+    private static final float DISTANCE_MARATHON = 42195.0f;
+    private static final float ACCEPTABLE = 0.1f; 
 
-    public MarathonAlgorithm(ShortestPathData data) 
-    {
+    private boolean isFinished = false;
+    private float bestDistanceDiff = Float.POSITIVE_INFINITY;
+
+    // Attributs de classe pour garder l'état de la meilleure solution pendant la récursion
+    private List<Arc> bestSolution;
+    private float bestDistanceDiff;
+
+    public MarathonAlgorithm(ShortestPathData data) {
         super(data);
     }
 
     @Override
-    protected ShortestPathSolution doRun() 
-    {
-
-        // Retrieve the graph.
+    protected ShortestPathSolution doRun() {
         ShortestPathData data = getInputData();
+        Graph graph = data.getGraph();
+        Node origin = data.getOrigin();
 
-        List<Arc> solution = null;
-        float distance_solution = Float.POSITIVE_INFINITY;
+        this.isFinished = false;
+        this.bestSolution = null;
+        this.bestDistanceDiff = Float.POSITIVE_INFINITY;
+        
+        boolean[] visited = new boolean[graph.size()];
+        List<Arc> currentPath = new ArrayList<>();
 
-        boolean visited[] = new boolean[data.getGraph().size()];
+        visited[origin.getId()] = true;
 
-        //Do the algorithm
-        DFS(data.getOrigin(), 0, solution, distance_solution, 42.125f, data.getOrigin(), visited);
+        DFS(origin, 0.0f, currentPath, origin, visited);
+
+        if (bestSolution != null) {
+            Path finalPath = new Path(graph, bestSolution);
+            return new ShortestPathSolution(data, Status.FEASIBLE, finalPath);
+        } else {
+            return new ShortestPathSolution(data, Status.INFEASIBLE);
+        }
     }
-
-    private ShortestPathSolution DFS(Node origin, float distance, List<Arc> solution, float distance_solution, float distance_marathon, Node origin_marathon, boolean[] visited) 
-    {
-        for (Arc arc_voisin : origin.getSuccessors()) {
-            Node destination = arc_voisin.getDestination();
-
-            if(!visited[destination.getId()]) {
-                visited[destination.getId()] = true;
-
-                if(destination == origin_marathon) {
-                    if(Math.abs(distance - distance_marathon) < Math.abs(distance_solution - distance_marathon)) {
-                        if(Math.abs(distance - distance_marathon) <= ACCEPTABLE) {
-                            is_acceptable = true;
-                        }   
-                        // Meilleur chemin trouver
-                        return 
-                    }
-                } else {
-                    // Ce chemin peut mener à une meilleur solution
-                    if(Math.abs(distance) < Math.abs(distance_solution)) {
-
-                        solution.add(arc_voisin);
-                        DFS(destination, distance + arc_voisin.getLength(), solution, distance_solution, distance_marathon, origin_marathon, visited);
-
+    private void DFS(Node currentNode, float currentDistance, List<Arc> currentPath, Node origin, boolean[] visited) {
+        if (isFinished || currentDistance >= DISTANCE_MARATHON + this.bestDistanceDiff) {
+            return; 
+        }
+    
+        for (Arc arc : currentNode.getSuccessors()) {
+            Node destination = arc.getDestination();
+            float newDistance = currentDistance + arc.getLength();
+    
+            if (destination.equals(origin)) {
+                float diff = Math.abs(newDistance - DISTANCE_MARATHON);
+                
+                if (diff < bestDistanceDiff) {
+                    this.bestDistanceDiff = diff;
+                    this.bestSolution = new ArrayList<>(currentPath);
+                    this.bestSolution.add(arc);
+                    
+                    if (diff <= ACCEPTABLE) {
+                        this.isFinished = true;
+                        return;
                     }
                 }
+            } 
+            else if (!visited[destination.getId()]) {
+                visited[destination.getId()] = true;
+                currentPath.add(arc);
+    
+                DFS(destination, newDistance, currentPath, origin, visited);
+    
+                currentPath.remove(currentPath.size() - 1);
+                visited[destination.getId()] = false;
             }
         }
     }
