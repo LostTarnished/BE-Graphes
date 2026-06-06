@@ -1,14 +1,6 @@
 package org.insa.graph.launch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -19,7 +11,11 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.insa.graphs.algorithm.ArcInspectorFactory;
-import org.insa.graphs.algorithm.shortestpath.*;
+import org.insa.graphs.algorithm.shortestpath.AStarAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.BellmanFordAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.ShortestPathData;
+import org.insa.graphs.algorithm.shortestpath.ShortestPathSolution;
 import org.insa.graphs.gui.drawing.Drawing;
 import org.insa.graphs.gui.drawing.components.BasicDrawing;
 import org.insa.graphs.model.Graph;
@@ -27,6 +23,11 @@ import org.insa.graphs.model.Node;
 import org.insa.graphs.model.Path;
 import org.insa.graphs.model.io.BinaryGraphReader;
 import org.insa.graphs.model.io.GraphReader;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class LaunchLeFinal {
 
@@ -69,26 +70,6 @@ public class LaunchLeFinal {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        initAll();
-        final Drawing drawing = createDrawing();
-        drawing.drawGraph(graphPetit);
-
-        Node origine =
-                graphPetit.getNodes().get(rand.nextInt(graphPetit.getNodes().size()));
-        Node destination =
-                graphPetit.getNodes().get(rand.nextInt(graphPetit.getNodes().size()));
-
-        ShortestPathData data = new ShortestPathData(graphPetit, origine, destination,
-                ArcInspectorFactory.getAllFilters().get(0));
-
-        ShortestPathSolution solDj = (new DijkstraAlgorithm(data)).run();
-
-        if (solDj.isFeasible()) {
-            drawing.drawPath(solDj.getPath(), Color.green);
-        }
-    }
-
     @Test
     public void testCheminLongueurNulle() {
         if (graphPetit == null)
@@ -119,8 +100,14 @@ public class LaunchLeFinal {
         ShortestPathData data = new ShortestPathData(graphPetit, origine, destination,
                 ArcInspectorFactory.getAllFilters().get(0));
 
+        long djStart = System.nanoTime();
         ShortestPathSolution solDj = new DijkstraAlgorithm(data).run();
+        long djEnd = System.nanoTime();
         ShortestPathSolution solBf = new BellmanFordAlgorithm(data).run();
+        long bfEnd = System.nanoTime();
+
+        System.out.println("Dijkstra chrono: " + (djEnd - djStart));
+        System.out.println("BellmanFord chrono: " + (bfEnd - djEnd));
 
         if (solBf.isFeasible()) {
             assertTrue(solDj.getPath().isValid());
@@ -130,7 +117,36 @@ public class LaunchLeFinal {
     }
 
     @Test
-    public void testValiditeDijkstraSurGrandGraphe() {
+    public void testDijkstraVsAStarSurPetitGraphe() {
+        if (graphPetit == null)
+            return;
+
+        Node origine =
+                graphPetit.getNodes().get(rand.nextInt(graphPetit.getNodes().size()));
+        Node destination =
+                graphPetit.getNodes().get(rand.nextInt(graphPetit.getNodes().size()));
+
+        ShortestPathData data = new ShortestPathData(graphPetit, origine, destination,
+                ArcInspectorFactory.getAllFilters().get(0));
+
+        long djStart = System.nanoTime();
+        ShortestPathSolution solDj = new DijkstraAlgorithm(data).run();
+        long djEnd = System.nanoTime();
+        ShortestPathSolution solASt = new AStarAlgorithm(data).run();
+        long astEnd = System.nanoTime();
+
+        System.out.println("Dijkstra chrono: " + (djEnd - djStart));
+        System.out.println("AStar chrono: " + (astEnd - djEnd));
+
+        if (solDj.isFeasible()) {
+            assertTrue(solASt.getPath().isValid());
+            assertEquals(solASt.getPath().getLength(), solDj.getPath().getLength(),
+                    1e-6);
+        }
+    }
+
+    @Test
+    public void testValiditeDijkstraAndAStarSurGrandGraphe() {
         if (graphGrand == null)
             return;
 
@@ -142,15 +158,28 @@ public class LaunchLeFinal {
         ShortestPathData data = new ShortestPathData(graphGrand, origine, destination,
                 ArcInspectorFactory.getAllFilters().get(0));
 
+        long djStart = System.nanoTime();
         ShortestPathSolution solDj = new DijkstraAlgorithm(data).run();
+        long djEnd = System.nanoTime();
+        ShortestPathSolution solASt = new AStarAlgorithm(data).run();
+        long astEnd = System.nanoTime();
+
+        System.out.println("Dijkstra chrono: " + (djEnd - djStart));
+        System.out.println("AStar chrono: " + (astEnd - djEnd));
 
         if (solDj.isFeasible()) {
             Path pathDj = solDj.getPath();
+            Path pathASt = solASt.getPath();
 
             assertTrue(pathDj.isValid());
             assertTrue(pathDj.getLength() >= 0);
             assertEquals(origine, pathDj.getOrigin());
             assertEquals(destination, pathDj.getDestination());
+
+            assertTrue(pathASt.isValid());
+            assertTrue(pathASt.getLength() >= 0);
+            assertEquals(origine, pathASt.getOrigin());
+            assertEquals(destination, pathASt.getDestination());
         }
     }
 
@@ -167,8 +196,14 @@ public class LaunchLeFinal {
         ShortestPathData data = new ShortestPathData(graphPetit, origine, destination,
                 ArcInspectorFactory.getAllFilters().get(2));
 
+        long djStart = System.nanoTime();
         ShortestPathSolution solDj = new DijkstraAlgorithm(data).run();
+        long djEnd = System.nanoTime();
         ShortestPathSolution solBf = new BellmanFordAlgorithm(data).run();
+        long bfEnd = System.nanoTime();
+
+        System.out.println("Dijkstra chrono: " + (djEnd - djStart));
+        System.out.println("BellmanFord chrono: " + (bfEnd - djEnd));
 
         if (solDj.isFeasible()) {
             assertTrue(solBf.isFeasible());
@@ -178,6 +213,40 @@ public class LaunchLeFinal {
         }
         else {
             assertFalse(solBf.isFeasible());
+        }
+    }
+
+
+    @Test
+    public void testDijkstraAndAStarTempsSurPetitGraphe() {
+        if (graphPetit == null)
+            return;
+
+        Node origine =
+                graphPetit.getNodes().get(rand.nextInt(graphPetit.getNodes().size()));
+        Node destination =
+                graphPetit.getNodes().get(rand.nextInt(graphPetit.getNodes().size()));
+
+        ShortestPathData data = new ShortestPathData(graphPetit, origine, destination,
+                ArcInspectorFactory.getAllFilters().get(2));
+
+        long djStart = System.nanoTime();
+        ShortestPathSolution solDj = new DijkstraAlgorithm(data).run();
+        long djEnd = System.nanoTime();
+        ShortestPathSolution solASt = new AStarAlgorithm(data).run();
+        long astEnd = System.nanoTime();
+
+        System.out.println("Dijkstra chrono: " + (djEnd - djStart));
+        System.out.println("AStar chrono: " + (astEnd - djEnd));
+
+        if (solASt.isFeasible()) {
+            assertTrue(solDj.isFeasible());
+            assertTrue(solASt.getPath().isValid());
+            assertEquals(solDj.getPath().getMinimumTravelTime(),
+                    solASt.getPath().getMinimumTravelTime(), 1e-6);
+        }
+        else {
+            assertFalse(solDj.isFeasible());
         }
     }
 }

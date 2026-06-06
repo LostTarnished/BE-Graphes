@@ -34,9 +34,8 @@ public class AlgorithmFactory {
                 BellmanFordAlgorithm.class);
         registerAlgorithm(ShortestPathAlgorithm.class, "Dijkstra",
                 DijkstraAlgorithm.class);
-        registerAlgorithm(ShortestPathAlgorithm.class, "A*", 
-                AStarAlgorithm.class);
-        registerAlgorithm(MarathonAlgorithm.class, "My Marathon Algorithm", 
+        registerAlgorithm(ShortestPathAlgorithm.class, "A*", AStarAlgorithm.class);
+        registerAlgorithm(MarathonAlgorithm.class, "My Marathon Algorithm",
                 MarathonAlgorithm.class);
     }
 
