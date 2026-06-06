@@ -56,7 +56,7 @@ public class LaunchLeFinal {
         final String urlPetitGraph =
                 "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/insa.mapgr";
         final String urlGrandGraph =
-                "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/france.mapgr";
+                "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/bretagne.mapgr";
 
         try (final GraphReader reader = new BinaryGraphReader(new DataInputStream(
                 new BufferedInputStream(new FileInputStream(urlPetitGraph))))) {
