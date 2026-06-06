@@ -25,7 +25,7 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
         final int nbNodes = data.getGraph().size();
 
         // Initialize array of distances.
-        StarLabel[] distance = new StarLabel[nbNodes];
+        this.distance = new StarLabel[nbNodes];
 
         for (int i = 0; i < nbNodes; i++) {
             Node n = data.getGraph().getNodes().get(i);
@@ -36,9 +36,9 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
                 l.setCostEstimated(l.getCostEstimated() / getMaxSpeed(data));
             }
 
-            distance[i] = l;
+            this.distance[i] = l;
         }
 
-        return this.doAlgorithm(data, distance);
+        return this.doAlgorithm(data);
     }
 }
